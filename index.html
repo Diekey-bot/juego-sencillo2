@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego Sencillo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #282c34;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        canvas {
+            border: 2px solid white;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // Configuración básica
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        document.body.appendChild(canvas);
+        canvas.width = 800;
+        canvas.height = 600;
+
+        // Variables del juego
+        let playerX = canvas.width / 2;
+        let playerY = canvas.height - 50;
+        const playerWidth = 50;
+        const playerHeight = 20;
+        const playerSpeed = 5;
+
+        let ballX = canvas.width / 2;
+        let ballY = canvas.height / 2;
+        let ballRadius = 10;
+        let ballSpeedX = 3;
+        let ballSpeedY = -3;
+
+        let score = 0;
+
+        // Detectar teclas presionadas
+        const keys = {};
+        window.addEventListener('keydown', (e) => keys[e.key] = true);
+        window.addEventListener('keyup', (e) => keys[e.key] = false);
+
+        // Función principal de actualización
+        function update() {
+            // Movimiento del jugador
+            if (keys['ArrowLeft'] && playerX > 0) playerX -= playerSpeed;
+            if (keys['ArrowRight'] && playerX < canvas.width - playerWidth) playerX += playerSpeed;
+
+            // Movimiento de la pelota
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+
+            // Colisiones con las paredes
+            if (ballX - ballRadius < 0 || ballX + ballRadius > canvas.width) {
+                ballSpeedX *= -1;
+            }
+            if (ballY - ballRadius < 0) {
+                ballSpeedY *= -1;
+            }
+
+            // Colisión con el jugador
+            if (
+                ballY + ballRadius > playerY &&
+                ballX > playerX &&
+                ballX < playerX + playerWidth
+            ) {
+                ballSpeedY *= -1;
+                score++;
+            }
+
+            // Game Over
+            if (ballY - ballRadius > canvas.height) {
+                alert(`¡Juego terminado! Puntuación final: ${score}`);
+                document.location.reload();
+            }
+        }
+
+        // Función para dibujar
+        function draw() {
+            // Limpiar el lienzo
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Dibujar el jugador
+            ctx.fillStyle = 'white';
+            ctx.fillRect(playerX, playerY, playerWidth, playerHeight);
+
+            // Dibujar la pelota
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+            ctx.fillStyle = 'red';
+            ctx.fill();
+            ctx.closePath();
+
+            // Dibujar la puntuación
+            ctx.fillStyle = 'white';
+            ctx.font = '20px Arial';
+            ctx.fillText(`Puntuación: ${score}`, 10, 30);
+        }
+
+        // Bucle principal del juego
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Iniciar el juego
+        gameLoop();
+    </script>
+</body>
+</html>
